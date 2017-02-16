@@ -1,0 +1,98 @@
+.container {
+	background:transparent;
+}
+
+#page {
+	margin-top:30px;
+	section {
+		background: #fff;
+	    padding: 15px 20px;
+	    border-radius: 3px;
+	    box-shadow: 0 2px 4px rgba(0,0,0,.1); 
+	    border-radius: 5px;
+	}
+}
+
+#related {
+	background:darken(@grey, 2%);
+	color:#000;
+	section {
+		border:0px;
+		header {
+			padding-bottom:20px;
+		}
+	}
+}
+
+// 5.2. section
+section {
+	border-bottom:1px solid #eee;
+	margin-bottom:24px;
+	padding:12px 0px;
+	position: relative;
+
+	.nav.nav-pills {
+		position: absolute;
+		top:0px;
+		left:0px;
+		right:0px;	
+	}
+
+	header {
+		padding:12px 0px;
+		padding-bottom:30px;
+		.title {
+			.h3;
+			display:inline-block;
+		}
+		.description {
+			font-size:15px;
+			margin:0px;
+			padding:0px;
+		}
+		.subtitle {
+			.primary-text;
+		}
+		.meta {
+			float:right;
+			label {
+				margin:0px!important;
+				padding:0px;
+			}
+		}
+		> * {
+			padding:5px 0px;
+		}
+	}
+}
+
+section.with-nav {
+	padding-top:56px!important;
+}
+
+
+section#feed-sm {
+    padding-right: 17px; 
+	margin-bottom:20px;
+	padding:0px;
+	
+	.block {
+		padding:20px;
+		header {
+			margin-bottom:10px;
+			padding-bottom:10px;
+			padding-top:0px;
+			margin-top:0px;
+			border-bottom:1px solid #eee;
+			.title {
+				font-size:20px;
+				vertical-align: middle;
+				.icon {
+					font-size:70%;
+					color:@black;
+					margin-right:10px;
+				}
+			}
+		}
+	}
+}

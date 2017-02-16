@@ -1,0 +1,78 @@
+.input-radio {
+    clear: both;
+    /*margin: 0 50px;*/
+    overflow: hidden;
+    input[type="checkbox"] {
+
+       &:empty {
+            display:none;
+       }
+    }
+    input[type="radio"] {
+      
+       &:empty {
+            display:none;
+       }
+    }
+    label {
+        width: 100%;
+        font-weight: normal;
+        float:right;
+        display:inline-block;
+    }
+}
+
+
+.input-radio input[type="radio"]:empty ~ label, .input-radio input[type="checkbox"]:empty ~ label {
+    position: relative;
+    line-height: 2em;
+    text-indent: 2.75em;
+    margin-top: 1em;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    .transition;
+}
+.input-radio input[type="radio"]:empty ~ label:before, .input-radio input[type="checkbox"]:empty ~ label:before {
+    position: absolute;
+    .transition;
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    content:'';
+    width: 2em;
+    height:2em;
+    background: @grey;
+    border:1px solid #ccc;
+    border-radius: @border-radius-base;
+}
+
+.input-radio input[type="radio"]:hover:not(:checked) ~ label, .input-radio input[type="checkbox"]:hover:not(:checked) ~ label {
+    color: #000;
+    border-radius: 100%;
+}
+.input-radio input[type="radio"]:checked ~ label:before, .input-radio input[type="checkbox"]:checked ~ label:before {
+    background-color: @primary;
+    padding:5px;
+    border:2px solid @primary; 
+}
+.input-radio input[type="radio"]:checked ~ label, .input-radio input[type="checkbox"]:checked ~ label {
+    color: #000;
+}
+.input-radio input[type="radio"]:focus ~ label:before, .input-radio input[type="checkbox"]:focus ~ label:before {
+    box-shadow: 0 0 0 3px #999;
+}
+.input-radio input[type="radio"]:checked ~ label:before, .input-radio-default input[type="checkbox"]:checked ~ label:before {
+    color: #fff;
+    background-color: @primary;
+    padding:5px;
+    border:2px solid @primary;
+    border-radius: 100%;
+}
+
+.input-radio input[type="radio"]:empty label {
+    border-radius:100%;
+}

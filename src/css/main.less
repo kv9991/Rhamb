@@ -1,0 +1,145 @@
+/////// CORsE HELPERS
+
+.border-radius {
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px; 
+}
+
+.transition {
+	transition: 0.3s all ease;
+	-moz-transition:0.3s all ease;
+	-webkit-transition:0.3s all ease;
+}
+
+/////// IMPO ssRTS
+
+// core variables and mixinss
+@import "./bootstrap/bootstrap.less";
+
+// styles for (max-width: 768px) mobiles
+@import "./mobile.less";
+
+// styles for (min-width: 768px) and (max-width: 992px) tablets only
+@import "./tablets.less";
+
+// Utils 
+@import "./modules/utils.less";
+
+
+/////// COLORS
+
+@primary: hsla(158%, 75%, 43%, 1);
+@black: hsla(230%, 7%, 18%, 1);
+@grey: hsla(0%, 0%, 99%, 1);
+@white: hsla(0%, 0%, 100%, 1);
+
+@primary: rgba(27, 193, 132, 1);
+@black: rgba(42, 43, 48, 1);
+@grey: rgba(250, 250, 250, 1);
+@white: rgba(255, 255, 255, 1);
+
+.bg-primary { background: @primary; }
+.bg-black { background: @black; }
+.bg-grey { background: @grey; }
+.bg-white { background: @white; }
+
+/////// GLOBAL STYLES
+
+body, html {
+	font-family: 'Open Sans', sans-serif;
+	background: @grey;
+}
+
+a:hover {
+	text-decoration: none;
+}
+
+/////// TYPOGRAPGY
+
+@font-family-open: "Open Sans", Helvetica, Arial, sans-serif;
+@font-family-roboto: "Roboto Slab", sans-serif;
+@font-size-base: 14px;
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6, {
+	font-family: @font-family-roboto;
+	display:block;
+	margin:0px;
+}
+
+.primary-text {
+	font-size: @font-size-large;
+}
+
+
+/////////// MODULES ///////////////
+
+// Layout default styles
+@import "./modules/layout";
+
+// Header
+@import "./modules/header";
+
+// Sidebar
+@import "./modules/sidebar";
+
+// Notify
+@import "./modules/notify";
+
+// Animations
+@import "./modules/animations";
+
+// Navigation
+@import 'modules/navigation.less';
+
+// Radio Input
+@import "./modules/radio.less"; 
+
+// File Input
+@import "./modules/file.less";
+
+// Scroll
+@import "./modules/scrollbar.less";
+
+// Article
+@import "./modules/article.less";
+
+// Go To Top Button
+@import "./modules/totop.less";
+
+// Footer
+@import "./modules/footer.less";
+
+// Tags
+@import "./modules/tags.less";
+
+// Post
+@import "./modules/post.less";
+
+
+// COMPONENTS
+
+// Statistic
+@import "./modules/components/statistic.less";
+
+// User
+@import "./modules/components/user.less";
+
+// Block
+@import "./modules/components/block.less";
+
+// Image
+@import "./modules/components/image.less";
+
+// Header-Search
+@import "./modules/components/header/search.less";
+
+// Hr 
+@import "./modules/components/post/hr.less";
+
+// Comments 
+@import "./modules/components/comments.less";
+
+// Feed-navigation 
+@import "./modules/components/feed/feed-navigation.less";

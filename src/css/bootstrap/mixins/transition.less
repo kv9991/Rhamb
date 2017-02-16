@@ -1,0 +1,9 @@
+.transition (@time) {
+
+	-webkit-transition: all @time cubic-bezier(0.080, 1, 0.600, 0.900); /* older webkit */
+	-webkit-transition: all @time cubic-bezier(0.080, 1.025, 0.600, 0.900); 
+	   -moz-transition: all @time cubic-bezier(0.080, 1.025, 0.600, 0.900); 
+	     -o-transition: all @time cubic-bezier(0.080, 1.025, 0.600, 0.900); 
+	        transition: all @time cubic-bezier(0.080, 1.025, 0.600, 0.900); /* custom */
+
+}

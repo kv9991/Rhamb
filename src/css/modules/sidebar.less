@@ -1,0 +1,67 @@
+#sidebar-wrapper {
+	#sidebar {
+		overflow-y:scroll;
+		overflow-x:visible;
+		height:85vh;
+	    padding-right: 17px; 
+		margin-bottom:20px;
+		padding:0px;
+		
+		.block-profile {
+			.image {
+				position: relative;
+				overflow:hidden;
+				img {
+					border-radius:@border-radius-base;
+				}
+				.image-overflow {
+					bottom:-100%;
+					position: absolute;
+					text-align:center;
+					left:0px;
+					width:100%;
+					padding:20px;
+					.transition;
+					background: -moz-linear-gradient(top,  rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 82%, rgba(0,0,0,0.4) 100%); /* FF3.6-15 */
+					background: -webkit-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 82%,rgba(0,0,0,0.4) 100%); /* Chrome10-25,Safari5.1-6 */
+					background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 82%,rgba(0,0,0,0.4) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+					filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#66000000',GradientType=0 ); 
+					a {
+						color:#fff;
+						background:transparent;
+						border-color:#fff;
+					}
+				}
+				&:hover {
+					.image-overflow {
+						bottom:0px;
+					}
+				}
+			}
+			
+			a {
+				margin-top:10px;
+			}
+		}
+	}
+
+
+	#sidebar.affix {
+		top:100px;
+		nav {
+			background:transparent;
+			padding:0px;
+		}
+	}
+	#sidebar.affix-top {
+		.vertical-menu {
+			li {
+				max-width:100%!important;
+				span {
+					opacity:1.0!important;
+				}
+			}
+		}
+	}
+}
+

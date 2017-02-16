@@ -1,0 +1,40 @@
+
+.notify-wrapper {
+	position: fixed;
+	left:0px;
+	bottom:0px;
+	margin:20px;
+	z-index:999;
+}
+
+.notify {
+	background:@black;
+	width:25vw;
+	padding:20px;
+	margin-bottom:20px;
+	padding-right:40px;
+	position: relative;
+	min-height:55px;
+
+	.border-radius;
+	.message {
+		color:#fff;
+	}
+	.close-mark {
+		position: absolute;
+		right:0px;
+		top:0px;
+		margin:15px;
+		padding:5px;
+		&:hover {
+			span {
+				color:@grey;
+			}
+		}
+		span {
+			color:darken(@grey, 70%);
+			cursor:pointer;
+		}
+		
+	}
+}

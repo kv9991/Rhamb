@@ -1,0 +1,29 @@
+#sidebar::-webkit-scrollbar {
+    width: 2px;
+    opacity:0;
+}
+
+#sidebar:hover::-webkit-scrollbar {
+	width: 2px;
+    opacity:0.4;
+}
+
+
+::-webkit-scrollbar-track {
+    border-radius: 10px;
+    background: #eee;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+    width: 2px;
+    opacity:0;
+    .transition;
+}
+
+#sidebar:hover::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #888;
+}
+::-webkit-scrollbar-thumb:window-inactive {
+    background: rgba(100,100,100,0.4); 
+}
