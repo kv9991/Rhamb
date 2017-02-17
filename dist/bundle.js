@@ -92,7 +92,7 @@
 
 	var root = new Root();
 
-	// Инициализируем приложение
+	// Инициализируем приложение 12
 	root.init();
 
 /***/ },
@@ -20747,18 +20747,20 @@
 
 	var _reactRedux = __webpack_require__(412);
 
-	var _reduxThunk = __webpack_require__(531);
+	var _reduxThunk = __webpack_require__(532);
 
 	var _reduxThunk2 = _interopRequireDefault(_reduxThunk);
 
-	var _windowOrGlobal = __webpack_require__(532);
+	var _windowOrGlobal = __webpack_require__(533);
 
 	var _windowOrGlobal2 = _interopRequireDefault(_windowOrGlobal);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var preloadedState = _windowOrGlobal2.default.__PRELOADED_STATE__;
-	var store = (0, _redux.createStore)(_reducers2.default, preloadedState, (0, _redux.applyMiddleware)(_reduxThunk2.default));
+
+	var composeEnhancers = _windowOrGlobal2.default.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || _redux.compose;
+	var store = (0, _redux.createStore)(_reducers2.default, preloadedState, composeEnhancers((0, _redux.applyMiddleware)(_reduxThunk2.default)));
 
 	var App = function (_Component) {
 		(0, _inherits3.default)(App, _Component);
@@ -35172,7 +35174,7 @@
 
 	var _post2 = _interopRequireDefault(_post);
 
-	var _header = __webpack_require__(526);
+	var _header = __webpack_require__(531);
 
 	var _header2 = _interopRequireDefault(_header);
 
@@ -35195,7 +35197,7 @@
 		value: true
 	});
 
-	var _defineProperty2 = __webpack_require__(533);
+	var _defineProperty2 = __webpack_require__(526);
 
 	var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 
@@ -35250,54 +35252,30 @@
 /* 526 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
+	exports.__esModule = true;
 
-	var _assign = __webpack_require__(527);
+	var _defineProperty = __webpack_require__(99);
 
-	var _assign2 = _interopRequireDefault(_assign);
-
-	var _header = __webpack_require__(507);
+	var _defineProperty2 = _interopRequireDefault(_defineProperty);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var initialState = {
-		isLoading: false,
-		isLoaded: false,
-		currentSection: false,
-		menuItems: []
+	exports.default = function (obj, key, value) {
+	  if (key in obj) {
+	    (0, _defineProperty2.default)(obj, key, {
+	      value: value,
+	      enumerable: true,
+	      configurable: true,
+	      writable: true
+	    });
+	  } else {
+	    obj[key] = value;
+	  }
+
+	  return obj;
 	};
-
-	var header = function header() {
-		var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
-		var action = arguments[1];
-
-		switch (action.type) {
-			case _header.SET_HEADER_STATUS:
-				return (0, _assign2.default)({}, state, {
-					isLoaded: action.payload
-				});
-			case _header.HEADER_SET_CURRENT_SECTION:
-				return (0, _assign2.default)({}, state, {
-					currentSection: action.payload
-				});
-			case _header.HEADER_START_LOADING:
-				return (0, _assign2.default)({}, state, {
-					isLoading: action.payload
-				});
-			case _header.HEADER_MOUNT_MENU:
-				return (0, _assign2.default)({}, state, {
-					menuItems: action.payload
-				});
-			default:
-				return state;
-		}
-	};
-
-	exports.default = header;
 
 /***/ },
 /* 527 */
@@ -35361,6 +35339,59 @@
 
 /***/ },
 /* 531 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _assign = __webpack_require__(527);
+
+	var _assign2 = _interopRequireDefault(_assign);
+
+	var _header = __webpack_require__(507);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var initialState = {
+		isLoading: false,
+		isLoaded: false,
+		currentSection: false,
+		menuItems: []
+	};
+
+	var header = function header() {
+		var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+		var action = arguments[1];
+
+		switch (action.type) {
+			case _header.SET_HEADER_STATUS:
+				return (0, _assign2.default)({}, state, {
+					isLoaded: action.payload
+				});
+			case _header.HEADER_SET_CURRENT_SECTION:
+				return (0, _assign2.default)({}, state, {
+					currentSection: action.payload
+				});
+			case _header.HEADER_START_LOADING:
+				return (0, _assign2.default)({}, state, {
+					isLoading: action.payload
+				});
+			case _header.HEADER_MOUNT_MENU:
+				return (0, _assign2.default)({}, state, {
+					menuItems: action.payload
+				});
+			default:
+				return state;
+		}
+	};
+
+	exports.default = header;
+
+/***/ },
+/* 532 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -35388,7 +35419,7 @@
 	exports['default'] = thunk;
 
 /***/ },
-/* 532 */
+/* 533 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict'
@@ -35397,35 +35428,6 @@
 	  this
 
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 533 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	exports.__esModule = true;
-
-	var _defineProperty = __webpack_require__(99);
-
-	var _defineProperty2 = _interopRequireDefault(_defineProperty);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	exports.default = function (obj, key, value) {
-	  if (key in obj) {
-	    (0, _defineProperty2.default)(obj, key, {
-	      value: value,
-	      enumerable: true,
-	      configurable: true,
-	      writable: true
-	    });
-	  } else {
-	    obj[key] = value;
-	  }
-
-	  return obj;
-	};
 
 /***/ }
 /******/ ]);

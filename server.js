@@ -3521,7 +3521,9 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	var preloadedState = _windowOrGlobal2.default.__PRELOADED_STATE__;
-	var store = (0, _redux.createStore)(_reducers2.default, preloadedState, (0, _redux.applyMiddleware)(_reduxThunk2.default));
+
+	var composeEnhancers = _windowOrGlobal2.default.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || _redux.compose;
+	var store = (0, _redux.createStore)(_reducers2.default, preloadedState, composeEnhancers((0, _redux.applyMiddleware)(_reduxThunk2.default)));
 
 	var App = function (_Component) {
 		_inherits(App, _Component);
