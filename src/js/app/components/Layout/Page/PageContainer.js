@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 
 export default class PageContainer extends Component {
+	static getState(store) {
+		return store
+	}
+
 	render() {
 		return (
 			<div id="page">

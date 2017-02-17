@@ -135,14 +135,25 @@
 	          _react2.default.createElement(_reactRouter.RouterContext, props)
 	        ));
 
-	        global.preloadedState = JSON.stringify(store.getState());
-	        res.send(renderPage(appHTML, global.preloadedState));
-	        console.log(store.getState());
+	        var renderedState = store.getState();
+
+	        return {
+	          state: renderedState,
+	          requests: renderedState.post.posts,
+	          html: appHTML
+	        };
+	      }).then(function (result) {
+
+	        store.dispatch(post.makeRequests(result.requests)).then(function (api) {
+	          console.log(api);
+	          global.preloadedState = JSON.stringify(result.state);
+	          res.send(renderPage(result.html, global.preloadedState));
+	        });
 	      });
 
 	      /* store.dispatch(header.ready())
 	      .then(() => { store.dispatch(posts.ready()).then(() => {
-	        console.log(store.getState());
+	        
 	          const appHTML = renderToString(
 	          <Provider store={store}>
 	            <RouterContext  {...props} />
@@ -150,7 +161,8 @@
 	        );
 	        global.preloadedState = JSON.stringify(store.getState());
 	        const html = renderPage(appHTML, global.preloadedState);
-	        res.send(html);
+	          res.send(html);
+	        console.log(preloadedState);
 	      }) }) */
 	    } else {
 	      res.status(404).send('Not Found');
@@ -321,6 +333,7 @@
 	});
 	exports.POST_FETCHING_ERROR = exports.POST_FETCHING_COMPLETED = exports.POST_START_FETCH = exports.CREATE_POST_REQUEST = undefined;
 	exports.createPostRequest = createPostRequest;
+	exports.makeRequests = makeRequests;
 	exports.ready = ready;
 
 	var _axios = __webpack_require__(10);
@@ -370,19 +383,41 @@
 					posts: []
 				} });
 
-			return _axios2.default.get('http://jsonplaceholder.typicode.com/posts?userId=1').then(function (result) {
-				dispatch({ type: POST_FETCHING_COMPLETED, payload: result.data, title: title, query: query });
+			/* return axios.get('http://jsonplaceholder.typicode.com/posts?userId=1')
+	  	.then((result) => { 
+	  		dispatch({ type: POST_FETCHING_COMPLETED, payload: result.data, title, query })
+	  	})
+	  */
+		};
+	}
+
+	function makeRequests(requests) {
+		return function (dispatch) {
+			return new Promise(function (resolve, reject) {
+				// МОК-АП РЕКВЕСТОВ. СДЕЛАТЬ НАСТОЯЩИЕ РЕКВЕСТЫ!
+				setTimeout(function () {
+					resolve('123');
+				}, 1000);
 			});
 		};
 	}
 
-	function makeRequest(request) {
-		return _axios2.default.get(request.query).then(function (result) {
-			dispatch({ type: POST_FETCHING_COMPLETED, payload: result.data, title: title, query: query });
-		}, function (err) {
-			console.log(err);
-		});
+	/*
+
+	function makeRequests(requests) {
+		return (dispatch) => {
+			return axios.get(request.query)
+			.then(
+			(result) => {
+				dispatch({ type: POST_FETCHING_COMPLETED, payload: result.data, title, query })
+			},
+			(err) => {
+				console.log(err);
+			})
+		}
 	}
+
+	*/
 
 	function ready() {
 		return function (dispatch, getState) {
@@ -390,14 +425,6 @@
 			var state = getState();
 			var requests = state.post.posts;
 			var requestsArray = [];
-
-			for (var key in requests) {
-				if (Object.prototype.hasOwnProperty.call(requests, key)) {
-					var val = requests[key];
-					requestsArray.push(val);
-					console.log(val);
-				}
-			}
 
 			dispatch({ type: POST_START_FETCH, payload: true });
 
@@ -648,6 +675,11 @@
 						)
 					)
 				);
+			}
+		}], [{
+			key: "getState",
+			value: function getState(store) {
+				return store;
 			}
 		}]);
 

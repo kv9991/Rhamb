@@ -29683,6 +29683,11 @@
 					)
 				);
 			}
+		}], [{
+			key: "getState",
+			value: function getState(store) {
+				return store;
+			}
 		}]);
 		return PageContainer;
 	}(_react.Component);
@@ -32741,7 +32746,13 @@
 		value: true
 	});
 	exports.POST_FETCHING_ERROR = exports.POST_FETCHING_COMPLETED = exports.POST_START_FETCH = exports.CREATE_POST_REQUEST = undefined;
+
+	var _promise = __webpack_require__(508);
+
+	var _promise2 = _interopRequireDefault(_promise);
+
 	exports.createPostRequest = createPostRequest;
+	exports.makeRequests = makeRequests;
 	exports.ready = ready;
 
 	var _axios = __webpack_require__(458);
@@ -32791,19 +32802,41 @@
 					posts: []
 				} });
 
-			return _axios2.default.get('http://jsonplaceholder.typicode.com/posts?userId=1').then(function (result) {
-				dispatch({ type: POST_FETCHING_COMPLETED, payload: result.data, title: title, query: query });
+			/* return axios.get('http://jsonplaceholder.typicode.com/posts?userId=1')
+	  	.then((result) => { 
+	  		dispatch({ type: POST_FETCHING_COMPLETED, payload: result.data, title, query })
+	  	})
+	  */
+		};
+	}
+
+	function makeRequests(requests) {
+		return function (dispatch) {
+			return new _promise2.default(function (resolve, reject) {
+				// МОК-АП РЕКВЕСТОВ. СДЕЛАТЬ НАСТОЯЩИЕ РЕКВЕСТЫ!
+				setTimeout(function () {
+					resolve('123');
+				}, 1000);
 			});
 		};
 	}
 
-	function makeRequest(request) {
-		return _axios2.default.get(request.query).then(function (result) {
-			dispatch({ type: POST_FETCHING_COMPLETED, payload: result.data, title: title, query: query });
-		}, function (err) {
-			console.log(err);
-		});
+	/*
+
+	function makeRequests(requests) {
+		return (dispatch) => {
+			return axios.get(request.query)
+			.then(
+			(result) => {
+				dispatch({ type: POST_FETCHING_COMPLETED, payload: result.data, title, query })
+			},
+			(err) => {
+				console.log(err);
+			})
+		}
 	}
+
+	*/
 
 	function ready() {
 		return function (dispatch, getState) {
@@ -32811,14 +32844,6 @@
 			var state = getState();
 			var requests = state.post.posts;
 			var requestsArray = [];
-
-			for (var key in requests) {
-				if (Object.prototype.hasOwnProperty.call(requests, key)) {
-					var val = requests[key];
-					requestsArray.push(val);
-					console.log(val);
-				}
-			}
 
 			dispatch({ type: POST_START_FETCH, payload: true });
 

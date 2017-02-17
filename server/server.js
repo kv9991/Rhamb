@@ -35,7 +35,6 @@ app.get('*', (req, res) => {
   match({ routes: routes, location: req.url }, (err, redirect, props) => {
 
     const store = createStore(reducer, applyMiddleware(thunk));
-
     
     if (err) {
       res.status(500).send(err.message)
@@ -46,22 +45,36 @@ app.get('*', (req, res) => {
     Promise.all([
       store.dispatch(header.ready()),
       store.dispatch(post.ready())
-    ]).then(() => {
-
-       const appHTML = renderToString(
+    ])
+    .then(() => {
+      
+      let appHTML = renderToString(
         <Provider store={store}>
           <RouterContext  {...props} />
         </Provider> 
-      );
+      )
 
-      global.preloadedState = JSON.stringify(store.getState());
-      res.send(renderPage(appHTML, global.preloadedState));
-      console.log(store.getState());
+      let renderedState = store.getState();
+
+      return {
+        state : renderedState,
+        requests : renderedState.post.posts,
+        html: appHTML
+      };
+    })
+    .then((result) => {
+
+      store.dispatch(post.makeRequests(result.requests))
+      .then((api) => {
+        console.log(api);
+        global.preloadedState = JSON.stringify(result.state);
+        res.send(renderPage(result.html, global.preloadedState));
+      })
     })
 
     /* store.dispatch(header.ready())
     .then(() => { store.dispatch(posts.ready()).then(() => {
-      console.log(store.getState());
+      
 
       const appHTML = renderToString(
         <Provider store={store}>
@@ -70,7 +83,9 @@ app.get('*', (req, res) => {
       );
       global.preloadedState = JSON.stringify(store.getState());
       const html = renderPage(appHTML, global.preloadedState);
+
       res.send(html);
+      console.log(preloadedState);
     }) }) */
     
 
