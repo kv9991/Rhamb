@@ -143,9 +143,7 @@
 	          html: appHTML
 	        };
 	      }).then(function (result) {
-
-	        store.dispatch(post.makeRequests(result.requests)).then(function (api) {
-	          console.log(api);
+	        store.dispatch(post.makeRequests(result.requests)).then(function (state) {
 	          global.preloadedState = JSON.stringify(result.state);
 	          res.send(renderPage(result.html, global.preloadedState));
 	        });
@@ -180,7 +178,7 @@
 	} */
 
 	var renderPage = function renderPage(appHtml, store) {
-	  return "\n    <!DOCTYPE html>\n\t<html lang=\"ru\">\n\t<head>\n\t\t<meta charset=\"UTF-8\">\n\t\t<title>Rhamb - \u0431\u043B\u043E\u0433-\u043F\u043B\u0430\u0442\u0444\u043E\u0440\u043C\u0430 \u0434\u043B\u044F \u0441\u043E\u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E\u0433\u043E \u0444\u0440\u043E\u043D\u0442-\u044D\u043D\u0434\u0430</title>\n\t\t<link rel=\"stylesheet\" href=\"" + url + "static/public/libs/simple-line/css/simple-line-icons.css\">\n\t\t<link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"" + url + "static/public/images/favicon/favicon-32x32.png\">\n\t\t<link href=\"https://fonts.googleapis.com/css?family=Open+Sans:300,400,700|Roboto+Slab:300,400,700&amp;subset=cyrillic,cyrillic-ext\" rel=\"stylesheet\">\n\t</head>\n\t<body>\n\t\t<div id=\"root\">" + appHtml + "</div>\n     <script>\n          window.__PRELOADED_STATE__ = " + store + "\n    </script>\n\t\t<script src=\"" + url + "static/bundle.js\"></script>\n    \n   \n\t</body>\n\t</html>\n   ";
+	  return "\n    <!DOCTYPE html>\n\t<html lang=\"ru\">\n\t<head>\n\t\t<meta charset=\"UTF-8\">\n\t\t<title>Rhamb - \u0431\u043B\u043E\u0433-\u043F\u043B\u0430\u0442\u0444\u043E\u0440\u043C\u0430 \u0434\u043B\u044F \u0441\u043E\u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E\u0433\u043E \u0444\u0440\u043E\u043D\u0442-\u044D\u043D\u0434\u0430</title>\n    <link rel=\"stylesheet\" href=\"" + url + "static/styles/main.css\">\n\t\t<link rel=\"stylesheet\" href=\"" + url + "static/public/libs/simple-line/css/simple-line-icons.css\">\n\t\t<link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"" + url + "static/public/images/favicon/favicon-32x32.png\">\n\t\t<link href=\"https://fonts.googleapis.com/css?family=Open+Sans:300,400,700|Roboto+Slab:300,400,700&amp;subset=cyrillic,cyrillic-ext\" rel=\"stylesheet\">\n\t</head>\n\t<body>\n\t\t<div id=\"root\">" + appHtml + "</div>\n     <script>\n          window.__PRELOADED_STATE__ = " + store + "\n    </script>\n\t\t<script src=\"" + url + "static/main.js\"></script>\n    \n   \n\t</body>\n\t</html>\n   ";
 	};
 
 	var PORT = process.env.PORT || 3000;
@@ -675,11 +673,6 @@
 						)
 					)
 				);
-			}
-		}], [{
-			key: "getState",
-			value: function getState(store) {
-				return store;
 			}
 		}]);
 

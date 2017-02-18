@@ -63,10 +63,8 @@ app.get('*', (req, res) => {
       };
     })
     .then((result) => {
-
       store.dispatch(post.makeRequests(result.requests))
-      .then((api) => {
-        console.log(api);
+      .then((state) => {
         global.preloadedState = JSON.stringify(result.state);
         res.send(renderPage(result.html, global.preloadedState));
       })
@@ -111,6 +109,7 @@ var renderPage = (appHtml, store) => {
 	<head>
 		<meta charset="UTF-8">
 		<title>Rhamb - блог-платформа для современного фронт-энда</title>
+    <link rel="stylesheet" href="${url}static/styles/main.css">
 		<link rel="stylesheet" href="${url}static/public/libs/simple-line/css/simple-line-icons.css">
 		<link rel="icon" type="image/png" sizes="32x32" href="${url}static/public/images/favicon/favicon-32x32.png">
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700|Roboto+Slab:300,400,700&amp;subset=cyrillic,cyrillic-ext" rel="stylesheet">
@@ -120,7 +119,7 @@ var renderPage = (appHtml, store) => {
      <script>
           window.__PRELOADED_STATE__ = ${store}
     </script>
-		<script src="${url}static/bundle.js"></script>
+		<script src="${url}static/main.js"></script>
     
    
 	</body>
