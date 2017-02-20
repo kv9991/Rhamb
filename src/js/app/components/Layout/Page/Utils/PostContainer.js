@@ -27,12 +27,13 @@ class PostContainer extends Component {
 		super(props);
 		this.state = {
 			URL: 'http://jsonplaceholder.typicode.com',
-			postsIDs: [],
+			postsRaw: [],
 			posts: [],
 			sortable: [],
 			currentPage: 1,
 			postsLoaded: 0,
 			isAllPushed: false,
+			title: null,
 			options: {
 				postsPerPage: this.props.options.postsPerPage || 10,
 				type: this.props.options.type || 'posts',
@@ -48,26 +49,26 @@ class PostContainer extends Component {
 	}
 
 	componentWillMount() {
-		var title = 'posts' + '-' + 
+
+		this.state.title = 'posts' + '-' + 
 				this.state.options.type + '-' + 
 				this.state.params.user + '-' + 
 				this.state.params.tag + '-' +
 				this.state.params.category;
 
-		var query = this.constructQuery();
-
-		this.props.dispatch(createPostRequest(title, query))
-		
-		/* this.props.dispatch({type: CREATE_POST_REQUEST, payload: {
-			title: title,
-			query: this.constructQuery()
-		}}) */
+		this.props.dispatch(createPostRequest(this.state.title, this.constructQuery()))
 		
 	}
 	
 	// Создаем компонент
 	componentDidMount() {
-		this.pushPostsIDs(this.constructQuery());
+		var posts = this.props.post.posts[this.state.title].posts;
+
+		posts.forEach((post) => {
+			this.state.postsRaw = this.state.postsRaw.concat(post);
+		})
+
+		this.pushPosts();
 	}
 
 	serializeQuery(obj) {
@@ -90,49 +91,29 @@ class PostContainer extends Component {
 		return this.state.URL + '/' + this.state.options.type + '?' + query;
 	}
 
-	// Сохраняем ID постов, которые дает нам Api в State
-	pushPostsIDs(query) {
-		axios.get(this.state.URL + '/' + 'posts' + '?' + query)
-		.then((response) => {
-			response.data.forEach((item, index, arr) => {
-				this.setState({
-					postsIDs: this.state.postsIDs.concat(item.id),
-				})
-			}) 
-		})
-		.then(() => {
-			this.pushPosts();
-		})
-	}
 
 	// Отображаем посты на экране
 	pushPosts() {
 		let page = this.state.currentPage * this.state.options.postsPerPage;
 		
-		for(var i = this.state.postsLoaded; i < page; i++) {
-			if (i < this.state.postsIDs.length) { 
-				axios.get(this.state.URL + '/' + 'posts' + '/' + this.state.postsIDs[i])
-				// axios.get(baseURI + '/' + type + '/' + state.postsIDs[i])
-				.then((response) => {
-					this.pushPostToState(response.data);
-				})
-				.catch((err) => {
-				    console.log(err);
-				});
+		for(var i = this.state.postsLoaded; i <= page; i++) {
+			if (i <= this.state.postsRaw.length) { 
+				this.pushPostToState(this.state.postsRaw[i]);
 			} else {
 				this.setState({
 					isAllPushed: true
 				})
 			}
 		}
+		this.state.currentPage += 1;
 
-		this.setState({
-			currentPage: this.state.currentPage + 1
-		})
+
+
 
 	}
 
 	pushPostToState(response) {
+		console.log(response);
 		if (this.state.options.template == 'list') {
 			var article;
 			switch(this.state.options.type) {
@@ -154,6 +135,7 @@ class PostContainer extends Component {
 					break;
 			}
 		}
+
 		this.setState({ 
 		    posts: this.state.posts.concat(article),
 			postsLoaded: this.state.postsLoaded + 1,
@@ -162,7 +144,9 @@ class PostContainer extends Component {
 	}
 
 	render() {
+		console.log(this.state.posts)
 		return ( 
+
 			<div>
 				{ this.state.posts }
 				{ (this.state.options.displayGetPostsButton && !this.state.isAllPushed) ? <button className="btn btn-primary" onClick={() => {this.pushPosts()}}>Загрузить ещё</button> : null }

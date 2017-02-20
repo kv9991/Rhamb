@@ -7,9 +7,6 @@ import { POST_START_FETCH,
 var initialState = {
 	isFetching: false,
 	isFetched: false,
-	error: null,
-	title: null,
-	query: null,
 	posts: {}
 }
 
@@ -31,11 +28,11 @@ const post = (state = initialState, action) => {
 				isFetched: true,
 				posts: {
 					...state.posts,
-					[action.title] : {
+					[action.title]: {
 						...state.posts[action.title],
 						posts: action.payload
 					}
-				} 
+				}
 			})
 		case POST_FETCHING_ERROR:
 			return state.errors.concat(action.payload)

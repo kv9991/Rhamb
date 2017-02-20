@@ -65,26 +65,12 @@ app.get('*', (req, res) => {
     .then((result) => {
       store.dispatch(post.makeRequests(result.requests))
       .then((state) => {
-        global.preloadedState = JSON.stringify(result.state);
-        res.send(renderPage(result.html, global.preloadedState));
+        console.log(state);
+        global.preloadedState = JSON.stringify(state);
+        res.send(renderPage(result.html, preloadedState));
       })
     })
 
-    /* store.dispatch(header.ready())
-    .then(() => { store.dispatch(posts.ready()).then(() => {
-      
-
-      const appHTML = renderToString(
-        <Provider store={store}>
-          <RouterContext  {...props} />
-        </Provider> 
-      );
-      global.preloadedState = JSON.stringify(store.getState());
-      const html = renderPage(appHTML, global.preloadedState);
-
-      res.send(html);
-      console.log(preloadedState);
-    }) }) */
     
 
     } else {
@@ -93,14 +79,6 @@ app.get('*', (req, res) => {
   })
 })
 
-/* function render(renderProps, res){
-  let store = createStore(reducer, applyMiddleware(thunk));
-  return new Promise((resolve, reject) => {
-      var app = ( <AsyncProvider store={store}><RouterContext {...renderProps} /></AsyncProvider> ); 
-        var html = renderToString(app);
-      return resolve(html);
-  });
-} */
 
 var renderPage = (appHtml, store) => {
   return `

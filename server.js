@@ -144,38 +144,16 @@
 	        };
 	      }).then(function (result) {
 	        store.dispatch(post.makeRequests(result.requests)).then(function (state) {
-	          global.preloadedState = JSON.stringify(result.state);
-	          res.send(renderPage(result.html, global.preloadedState));
+	          console.log(state);
+	          global.preloadedState = JSON.stringify(state);
+	          res.send(renderPage(result.html, preloadedState));
 	        });
 	      });
-
-	      /* store.dispatch(header.ready())
-	      .then(() => { store.dispatch(posts.ready()).then(() => {
-	        
-	          const appHTML = renderToString(
-	          <Provider store={store}>
-	            <RouterContext  {...props} />
-	          </Provider> 
-	        );
-	        global.preloadedState = JSON.stringify(store.getState());
-	        const html = renderPage(appHTML, global.preloadedState);
-	          res.send(html);
-	        console.log(preloadedState);
-	      }) }) */
 	    } else {
 	      res.status(404).send('Not Found');
 	    }
 	  });
 	});
-
-	/* function render(renderProps, res){
-	  let store = createStore(reducer, applyMiddleware(thunk));
-	  return new Promise((resolve, reject) => {
-	      var app = ( <AsyncProvider store={store}><RouterContext {...renderProps} /></AsyncProvider> ); 
-	        var html = renderToString(app);
-	      return resolve(html);
-	  });
-	} */
 
 	var renderPage = function renderPage(appHtml, store) {
 	  return "\n    <!DOCTYPE html>\n\t<html lang=\"ru\">\n\t<head>\n\t\t<meta charset=\"UTF-8\">\n\t\t<title>Rhamb - \u0431\u043B\u043E\u0433-\u043F\u043B\u0430\u0442\u0444\u043E\u0440\u043C\u0430 \u0434\u043B\u044F \u0441\u043E\u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E\u0433\u043E \u0444\u0440\u043E\u043D\u0442-\u044D\u043D\u0434\u0430</title>\n    <link rel=\"stylesheet\" href=\"" + url + "static/styles/main.css\">\n\t\t<link rel=\"stylesheet\" href=\"" + url + "static/public/libs/simple-line/css/simple-line-icons.css\">\n\t\t<link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"" + url + "static/public/images/favicon/favicon-32x32.png\">\n\t\t<link href=\"https://fonts.googleapis.com/css?family=Open+Sans:300,400,700|Roboto+Slab:300,400,700&amp;subset=cyrillic,cyrillic-ext\" rel=\"stylesheet\">\n\t</head>\n\t<body>\n\t\t<div id=\"root\">" + appHtml + "</div>\n     <script>\n          window.__PRELOADED_STATE__ = " + store + "\n    </script>\n\t\t<script src=\"" + url + "static/main.js\"></script>\n    \n   \n\t</body>\n\t</html>\n   ";
@@ -372,30 +350,51 @@
 		};
 	};
 
+	function shouldCreateRequest(title, state) {
+		if (state.post.posts.hasOwnProperty(title)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	function createPostRequest(title, query) {
-		return function (dispatch) {
-
-			dispatch({ type: CREATE_POST_REQUEST, payload: {
-					title: title,
-					query: query,
-					posts: []
-				} });
-
-			/* return axios.get('http://jsonplaceholder.typicode.com/posts?userId=1')
-	  	.then((result) => { 
-	  		dispatch({ type: POST_FETCHING_COMPLETED, payload: result.data, title, query })
-	  	})
-	  */
+		return function (dispatch, getState) {
+			if (!shouldCreateRequest(title, getState())) {
+				dispatch({ type: CREATE_POST_REQUEST, payload: {
+						title: title,
+						query: query,
+						posts: null
+					} });
+			} else {
+				return true;
+			}
 		};
 	}
 
+	function makeRequest(request, dispatch) {
+		return _axios2.default.get('https://jsonplaceholder.typicode.com/posts?userId=1').then(function (result) {
+			dispatch({
+				type: POST_FETCHING_COMPLETED,
+				payload: result.data,
+				title: request.title,
+				query: request.query
+			});
+		});
+	}
+
 	function makeRequests(requests) {
-		return function (dispatch) {
-			return new Promise(function (resolve, reject) {
-				// МОК-АП РЕКВЕСТОВ. СДЕЛАТЬ НАСТОЯЩИЕ РЕКВЕСТЫ!
-				setTimeout(function () {
-					resolve('123');
-				}, 1000);
+		return function (dispatch, getState) {
+			var promises = [];
+
+			Object.values(requests).forEach(function (request) {
+				promises.push(makeRequest(request, dispatch));
+			});
+
+			var chain = Promise.resolve();
+
+			return Promise.all(promises).then(function () {
+				return getState();
 			});
 		};
 	}
@@ -486,9 +485,6 @@
 	var initialState = {
 		isFetching: false,
 		isFetched: false,
-		error: null,
-		title: null,
-		query: null,
 		posts: {}
 	};
 
@@ -1037,12 +1033,13 @@
 
 			_this.state = {
 				URL: 'http://jsonplaceholder.typicode.com',
-				postsIDs: [],
+				postsRaw: [],
 				posts: [],
 				sortable: [],
 				currentPage: 1,
 				postsLoaded: 0,
 				isAllPushed: false,
+				title: null,
 				options: {
 					postsPerPage: _this.props.options.postsPerPage || 10,
 					type: _this.props.options.type || 'posts',
@@ -1061,16 +1058,10 @@
 		_createClass(PostContainer, [{
 			key: 'componentWillMount',
 			value: function componentWillMount() {
-				var title = 'posts' + '-' + this.state.options.type + '-' + this.state.params.user + '-' + this.state.params.tag + '-' + this.state.params.category;
 
-				var query = this.constructQuery();
+				this.state.title = 'posts' + '-' + this.state.options.type + '-' + this.state.params.user + '-' + this.state.params.tag + '-' + this.state.params.category;
 
-				this.props.dispatch((0, _post.createPostRequest)(title, query));
-
-				/* this.props.dispatch({type: CREATE_POST_REQUEST, payload: {
-	   	title: title,
-	   	query: this.constructQuery()
-	   }}) */
+				this.props.dispatch((0, _post.createPostRequest)(this.state.title, this.constructQuery()));
 			}
 
 			// Создаем компонент
@@ -1078,7 +1069,15 @@
 		}, {
 			key: 'componentDidMount',
 			value: function componentDidMount() {
-				this.pushPostsIDs(this.constructQuery());
+				var _this2 = this;
+
+				var posts = this.props.post.posts[this.state.title].posts;
+
+				posts.forEach(function (post) {
+					_this2.state.postsRaw = _this2.state.postsRaw.concat(post);
+				});
+
+				this.pushPosts();
 			}
 		}, {
 			key: 'serializeQuery',
@@ -1105,56 +1104,28 @@
 				return this.state.URL + '/' + this.state.options.type + '?' + query;
 			}
 
-			// Сохраняем ID постов, которые дает нам Api в State
-
-		}, {
-			key: 'pushPostsIDs',
-			value: function pushPostsIDs(query) {
-				var _this2 = this;
-
-				_axios2.default.get(this.state.URL + '/' + 'posts' + '?' + query).then(function (response) {
-					response.data.forEach(function (item, index, arr) {
-						_this2.setState({
-							postsIDs: _this2.state.postsIDs.concat(item.id)
-						});
-					});
-				}).then(function () {
-					_this2.pushPosts();
-				});
-			}
-
 			// Отображаем посты на экране
 
 		}, {
 			key: 'pushPosts',
 			value: function pushPosts() {
-				var _this3 = this;
-
 				var page = this.state.currentPage * this.state.options.postsPerPage;
 
-				for (var i = this.state.postsLoaded; i < page; i++) {
-					if (i < this.state.postsIDs.length) {
-						_axios2.default.get(this.state.URL + '/' + 'posts' + '/' + this.state.postsIDs[i])
-						// axios.get(baseURI + '/' + type + '/' + state.postsIDs[i])
-						.then(function (response) {
-							_this3.pushPostToState(response.data);
-						}).catch(function (err) {
-							console.log(err);
-						});
+				for (var i = this.state.postsLoaded; i <= page; i++) {
+					if (i <= this.state.postsRaw.length) {
+						this.pushPostToState(this.state.postsRaw[i]);
 					} else {
 						this.setState({
 							isAllPushed: true
 						});
 					}
 				}
-
-				this.setState({
-					currentPage: this.state.currentPage + 1
-				});
+				this.state.currentPage += 1;
 			}
 		}, {
 			key: 'pushPostToState',
 			value: function pushPostToState(response) {
+				console.log(response);
 				if (this.state.options.template == 'list') {
 					var article;
 					switch (this.state.options.type) {
@@ -1176,6 +1147,7 @@
 							break;
 					}
 				}
+
 				this.setState({
 					posts: this.state.posts.concat(article),
 					postsLoaded: this.state.postsLoaded + 1
@@ -1184,8 +1156,9 @@
 		}, {
 			key: 'render',
 			value: function render() {
-				var _this4 = this;
+				var _this3 = this;
 
+				console.log(this.state.posts);
 				return _react2.default.createElement(
 					'div',
 					null,
@@ -1193,7 +1166,7 @@
 					this.state.options.displayGetPostsButton && !this.state.isAllPushed ? _react2.default.createElement(
 						'button',
 						{ className: 'btn btn-primary', onClick: function onClick() {
-								_this4.pushPosts();
+								_this3.pushPosts();
 							} },
 						'\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0435\u0449\u0451'
 					) : null

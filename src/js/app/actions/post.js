@@ -32,33 +32,57 @@ var startFetching = (value) => {
 	}
 }
 
-export function createPostRequest(title, query) {
-	return (dispatch) => {
-
-		dispatch({type: CREATE_POST_REQUEST, payload: {
-			title,
-			query,
-			posts: []
-		}})
-
-		/* return axios.get('http://jsonplaceholder.typicode.com/posts?userId=1')
-			.then((result) => { 
-				dispatch({ type: POST_FETCHING_COMPLETED, payload: result.data, title, query })
-			})
-		*/
+function shouldCreateRequest(title, state) {
+	if (state.post.posts.hasOwnProperty(title)) {
+		return true
+	} else {
+		return false
 	}
+}
+ 
+export function createPostRequest(title, query) {
+	return (dispatch, getState) => {
+		if (!shouldCreateRequest(title, getState())) {
+			dispatch({type: CREATE_POST_REQUEST, payload: {
+				title,
+				query,
+				posts: null
+			}})
+		} else {
+			return true
+		}
+	}
+}
+
+
+function makeRequest(request, dispatch) {
+	return axios.get('https://jsonplaceholder.typicode.com/posts?userId=1')
+		.then((result) => {
+			dispatch({ 
+				type: POST_FETCHING_COMPLETED, 
+				payload: result.data, 
+				title: request.title, 
+				query: request.query 
+			})
+		})
 }
 
 export function makeRequests(requests) {
-	return (dispatch) => {
-		return new Promise((resolve, reject) => {
-			// МОК-АП РЕКВЕСТОВ. СДЕЛАТЬ НАСТОЯЩИЕ РЕКВЕСТЫ!
-			setTimeout(() => {
-				resolve('123');
-			}, 1000)
+	return (dispatch, getState) => {
+		var promises = [];
+
+		Object.values(requests).forEach((request) => {
+			promises.push(makeRequest(request, dispatch));
 		})
+
+		let chain = Promise.resolve();
+			
+		return Promise.all(promises).then(() => {
+			return getState();
+		});
 	}
 }
+
 
 /*
 
