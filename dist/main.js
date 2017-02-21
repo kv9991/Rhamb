@@ -29635,9 +29635,6 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	// http://stackoverflow.com/questions/1069666/sorting-javascript-object-by-property-value
-	// Используя этот материал сделать сортировку с помощью state.sortable и функции posts.sort();
-
 	var PostContainer = function (_Component) {
 		(0, _inherits3.default)(PostContainer, _Component);
 
@@ -29647,13 +29644,6 @@
 			var _this = (0, _possibleConstructorReturn3.default)(this, (PostContainer.__proto__ || (0, _getPrototypeOf2.default)(PostContainer)).call(this, props));
 
 			_this.state = {
-				URL: 'http://jsonplaceholder.typicode.com',
-				postsRaw: [],
-				posts: [],
-				sortable: [],
-				currentPage: 1,
-				postsLoaded: 0,
-				isAllPushed: false,
 				title: null,
 				options: {
 					postsPerPage: _this.props.options.postsPerPage || 10,
@@ -29673,10 +29663,12 @@
 		(0, _createClass3.default)(PostContainer, [{
 			key: 'componentWillMount',
 			value: function componentWillMount() {
+				var _props = this.props,
+				    dispatch = _props.dispatch,
+				    post = _props.post;
 
-				this.state.title = 'posts' + '-' + this.state.options.type + '-' + this.state.params.user + '-' + this.state.params.tag + '-' + this.state.params.category;
-
-				this.props.dispatch((0, _post.createPostRequest)(this.state.title, this.constructQuery()));
+				this.state.title = this.createTitle();
+				dispatch((0, _post.createPostRequest)(this.state.title, this.constructQuery(), this.state.options, this.state.params));
 			}
 
 			// Создаем компонент
@@ -29684,15 +29676,16 @@
 		}, {
 			key: 'componentDidMount',
 			value: function componentDidMount() {
-				var _this2 = this;
+				var _props2 = this.props,
+				    dispatch = _props2.dispatch,
+				    post = _props2.post;
 
-				var posts = this.props.post.posts[this.state.title].posts;
-
-				posts.forEach(function (post) {
-					_this2.state.postsRaw = _this2.state.postsRaw.concat(post);
-				});
-
-				this.pushPosts();
+				var posts = post.posts[this.state.title].posts;
+			}
+		}, {
+			key: 'createTitle',
+			value: function createTitle() {
+				return this.state.options.type + '-' + this.state.params.user + '-' + this.state.params.tag + '-' + this.state.params.category;
 			}
 		}, {
 			key: 'serializeQuery',
@@ -29724,11 +29717,17 @@
 		}, {
 			key: 'pushPosts',
 			value: function pushPosts() {
-				var page = this.state.currentPage * this.state.options.postsPerPage;
+				var _props3 = this.props,
+				    dispatch = _props3.dispatch,
+				    post = _props3.post;
 
-				for (var i = this.state.postsLoaded; i <= page; i++) {
-					if (i <= this.state.postsRaw.length) {
-						this.pushPostToState(this.state.postsRaw[i]);
+				var postState = post.posts[this.state.title];
+
+				var page = postState.currentPage * postState.options.postsPerPage;
+
+				for (var i = postState.postsLoaded; i <= page; i++) {
+					if (i <= postState.posts.length) {
+						this.pushPostToState(postState.posts[i]);
 					} else {
 						this.setState({
 							isAllPushed: true
@@ -29740,7 +29739,11 @@
 		}, {
 			key: 'pushPostToState',
 			value: function pushPostToState(response) {
-				console.log(response);
+				var _props4 = this.props,
+				    dispatch = _props4.dispatch,
+				    post = _props4.post;
+
+
 				if (this.state.options.template == 'list') {
 					var article;
 					switch (this.state.options.type) {
@@ -29763,25 +29766,21 @@
 					}
 				}
 
-				this.setState({
-					posts: this.state.posts.concat(article),
-					postsLoaded: this.state.postsLoaded + 1
-				});
+				dispatch((0, _post.makePostComponent)(article, this.state.title));
 			}
 		}, {
 			key: 'render',
 			value: function render() {
-				var _this3 = this;
+				var _this2 = this;
 
-				console.log(this.state.posts);
+				// console.log(this.props.post.posts[this.state.title])
 				return _react2.default.createElement(
 					'div',
 					null,
-					this.state.posts,
 					this.state.options.displayGetPostsButton && !this.state.isAllPushed ? _react2.default.createElement(
 						'button',
 						{ className: 'btn btn-primary', onClick: function onClick() {
-								_this3.pushPosts();
+								_this2.pushPosts();
 							} },
 						'\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0435\u0449\u0451'
 					) : null
@@ -32272,13 +32271,13 @@
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
-	exports.POST_FETCHING_ERROR = exports.POST_FETCHING_COMPLETED = exports.POST_START_FETCH = exports.CREATE_POST_REQUEST = undefined;
+	exports.MAKE_POST_COMPONENT = exports.CREATE_POST_COMPONENTS = exports.POST_SET_IS_ALL_PUSHED = exports.POST_INCREASE_CURRENT_PAGE = exports.POST_FETCHING_ERROR = exports.POST_FETCHING_COMPLETED = exports.POST_START_FETCH = exports.CREATE_POST_REQUEST = undefined;
 
-	var _promise = __webpack_require__(398);
+	var _promise = __webpack_require__(394);
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _values = __webpack_require__(394);
+	var _values = __webpack_require__(410);
 
 	var _values2 = _interopRequireDefault(_values);
 
@@ -32324,6 +32323,51 @@
 		};
 	};
 
+	var POST_INCREASE_CURRENT_PAGE = exports.POST_INCREASE_CURRENT_PAGE = 'POST_INCREASE_CURRENT_PAGE';
+	function increaseCurrentPage(title) {
+		return {
+			type: POST_INCREASE_CURRENT_PAGE,
+			title: title
+		};
+	}
+
+	var POST_SET_IS_ALL_PUSHED = exports.POST_SET_IS_ALL_PUSHED = 'POST_SET_IS_ALL_PUSHED';
+	function setIsAllPushed(value) {
+		return {
+			type: POST_SET_IS_ALL_PUSHED,
+			payload: value
+		};
+	}
+
+	var CREATE_POST_COMPONENTS = exports.CREATE_POST_COMPONENTS = 'CREATE_POST_COMPONENTS';
+	function createPostComponents(posts, title) {
+		return function (dispatch, getState) {
+
+			var postState = getState().post.posts[title];
+			var page = postState.currentPage * postState.options.postsPerPage;
+
+			for (var i = postState.postsLoaded; i <= page; i++) {
+				if (i <= posts.length) {
+					console.log(posts[i]);
+					dispatch(makePostComponent(posts[i], title));
+				} else {
+					dispatch(setIsAllPushed(true));
+				}
+			}
+
+			dispatch(increaseCurrentPage(title));
+		};
+	}
+
+	var MAKE_POST_COMPONENT = exports.MAKE_POST_COMPONENT = 'MAKE_POST_COMPONENT';
+	function makePostComponent(post, title) {
+		return {
+			type: MAKE_POST_COMPONENT,
+			payload: post,
+			title: title
+		};
+	}
+
 	function shouldCreateRequest(title, state) {
 		if (state.post.posts.hasOwnProperty(title)) {
 			return true;
@@ -32332,12 +32376,14 @@
 		}
 	}
 
-	function createPostRequest(title, query) {
+	function createPostRequest(title, query, options, params) {
 		return function (dispatch, getState) {
 			if (!shouldCreateRequest(title, getState())) {
 				dispatch({ type: CREATE_POST_REQUEST, payload: {
 						title: title,
 						query: query,
+						options: options,
+						params: params,
 						posts: null
 					} });
 			} else {
@@ -32354,6 +32400,9 @@
 				title: request.title,
 				query: request.query
 			});
+			return result;
+		}).then(function (result) {
+			dispatch(createPostComponents(result.data, request.title));
 		});
 	}
 
@@ -32372,6 +32421,10 @@
 			});
 		};
 	}
+
+	/* this.setState({ 
+			    posts: this.state.posts.concat(article),
+				postsLoaded: this.state.postsLoaded + 1,
 
 	/*
 
@@ -32415,77 +32468,29 @@
 /* 395 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(396);
-	module.exports = __webpack_require__(8).Object.values;
-
-/***/ },
-/* 396 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// https://github.com/tc39/proposal-object-values-entries
-	var $export = __webpack_require__(6)
-	  , $values = __webpack_require__(397)(false);
-
-	$export($export.S, 'Object', {
-	  values: function values(it){
-	    return $values(it);
-	  }
-	});
-
-/***/ },
-/* 397 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var getKeys   = __webpack_require__(207)
-	  , toIObject = __webpack_require__(209)
-	  , isEnum    = __webpack_require__(232).f;
-	module.exports = function(isEntries){
-	  return function(it){
-	    var O      = toIObject(it)
-	      , keys   = getKeys(O)
-	      , length = keys.length
-	      , i      = 0
-	      , result = []
-	      , key;
-	    while(length > i)if(isEnum.call(O, key = keys[i++])){
-	      result.push(isEntries ? [key, O[key]] : O[key]);
-	    } return result;
-	  };
-	};
-
-/***/ },
-/* 398 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(399), __esModule: true };
-
-/***/ },
-/* 399 */
-/***/ function(module, exports, __webpack_require__) {
-
 	__webpack_require__(237);
 	__webpack_require__(197);
 	__webpack_require__(219);
-	__webpack_require__(400);
+	__webpack_require__(396);
 	module.exports = __webpack_require__(8).Promise;
 
 /***/ },
-/* 400 */
+/* 396 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	var LIBRARY            = __webpack_require__(201)
 	  , global             = __webpack_require__(7)
 	  , ctx                = __webpack_require__(9)
-	  , classof            = __webpack_require__(401)
+	  , classof            = __webpack_require__(397)
 	  , $export            = __webpack_require__(6)
 	  , isObject           = __webpack_require__(14)
 	  , aFunction          = __webpack_require__(10)
-	  , anInstance         = __webpack_require__(402)
-	  , forOf              = __webpack_require__(403)
-	  , speciesConstructor = __webpack_require__(407)
-	  , task               = __webpack_require__(408).set
-	  , microtask          = __webpack_require__(410)()
+	  , anInstance         = __webpack_require__(398)
+	  , forOf              = __webpack_require__(399)
+	  , speciesConstructor = __webpack_require__(403)
+	  , task               = __webpack_require__(404).set
+	  , microtask          = __webpack_require__(406)()
 	  , PROMISE            = 'Promise'
 	  , TypeError          = global.TypeError
 	  , process            = global.process
@@ -32677,7 +32682,7 @@
 	    this._h = 0;              // <- rejection state, 0 - default, 1 - handled, 2 - unhandled
 	    this._n = false;          // <- notify
 	  };
-	  Internal.prototype = __webpack_require__(411)($Promise.prototype, {
+	  Internal.prototype = __webpack_require__(407)($Promise.prototype, {
 	    // 25.4.5.3 Promise.prototype.then(onFulfilled, onRejected)
 	    then: function then(onFulfilled, onRejected){
 	      var reaction    = newPromiseCapability(speciesConstructor(this, $Promise));
@@ -32704,7 +32709,7 @@
 
 	$export($export.G + $export.W + $export.F * !USE_NATIVE, {Promise: $Promise});
 	__webpack_require__(217)($Promise, PROMISE);
-	__webpack_require__(412)(PROMISE);
+	__webpack_require__(408)(PROMISE);
 	Wrapper = __webpack_require__(8)[PROMISE];
 
 	// statics
@@ -32728,7 +32733,7 @@
 	    return capability.promise;
 	  }
 	});
-	$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(413)(function(iter){
+	$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(409)(function(iter){
 	  $Promise.all(iter)['catch'](empty);
 	})), PROMISE, {
 	  // 25.4.4.1 Promise.all(iterable)
@@ -32774,7 +32779,7 @@
 	});
 
 /***/ },
-/* 401 */
+/* 397 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// getting tag from 19.1.3.6 Object.prototype.toString()
@@ -32802,7 +32807,7 @@
 	};
 
 /***/ },
-/* 402 */
+/* 398 */
 /***/ function(module, exports) {
 
 	module.exports = function(it, Constructor, name, forbiddenField){
@@ -32812,15 +32817,15 @@
 	};
 
 /***/ },
-/* 403 */
+/* 399 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var ctx         = __webpack_require__(9)
-	  , call        = __webpack_require__(404)
-	  , isArrayIter = __webpack_require__(405)
+	  , call        = __webpack_require__(400)
+	  , isArrayIter = __webpack_require__(401)
 	  , anObject    = __webpack_require__(13)
 	  , toLength    = __webpack_require__(213)
-	  , getIterFn   = __webpack_require__(406)
+	  , getIterFn   = __webpack_require__(402)
 	  , BREAK       = {}
 	  , RETURN      = {};
 	var exports = module.exports = function(iterable, entries, fn, that, ITERATOR){
@@ -32842,7 +32847,7 @@
 	exports.RETURN = RETURN;
 
 /***/ },
-/* 404 */
+/* 400 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// call something on iterator step with safe closing on error
@@ -32859,7 +32864,7 @@
 	};
 
 /***/ },
-/* 405 */
+/* 401 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// check on default Array iterator
@@ -32872,10 +32877,10 @@
 	};
 
 /***/ },
-/* 406 */
+/* 402 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var classof   = __webpack_require__(401)
+	var classof   = __webpack_require__(397)
 	  , ITERATOR  = __webpack_require__(218)('iterator')
 	  , Iterators = __webpack_require__(203);
 	module.exports = __webpack_require__(8).getIteratorMethod = function(it){
@@ -32885,7 +32890,7 @@
 	};
 
 /***/ },
-/* 407 */
+/* 403 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// 7.3.20 SpeciesConstructor(O, defaultConstructor)
@@ -32898,11 +32903,11 @@
 	};
 
 /***/ },
-/* 408 */
+/* 404 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var ctx                = __webpack_require__(9)
-	  , invoke             = __webpack_require__(409)
+	  , invoke             = __webpack_require__(405)
 	  , html               = __webpack_require__(216)
 	  , cel                = __webpack_require__(18)
 	  , global             = __webpack_require__(7)
@@ -32978,7 +32983,7 @@
 	};
 
 /***/ },
-/* 409 */
+/* 405 */
 /***/ function(module, exports) {
 
 	// fast apply, http://jsperf.lnkit.com/fast-apply/5
@@ -32999,11 +33004,11 @@
 	};
 
 /***/ },
-/* 410 */
+/* 406 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var global    = __webpack_require__(7)
-	  , macrotask = __webpack_require__(408).set
+	  , macrotask = __webpack_require__(404).set
 	  , Observer  = global.MutationObserver || global.WebKitMutationObserver
 	  , process   = global.process
 	  , Promise   = global.Promise
@@ -33072,7 +33077,7 @@
 	};
 
 /***/ },
-/* 411 */
+/* 407 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var hide = __webpack_require__(11);
@@ -33084,7 +33089,7 @@
 	};
 
 /***/ },
-/* 412 */
+/* 408 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -33103,7 +33108,7 @@
 	};
 
 /***/ },
-/* 413 */
+/* 409 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var ITERATOR     = __webpack_require__(218)('iterator')
@@ -33126,6 +33131,54 @@
 	    exec(arr);
 	  } catch(e){ /* empty */ }
 	  return safe;
+	};
+
+/***/ },
+/* 410 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = { "default": __webpack_require__(411), __esModule: true };
+
+/***/ },
+/* 411 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(412);
+	module.exports = __webpack_require__(8).Object.values;
+
+/***/ },
+/* 412 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// https://github.com/tc39/proposal-object-values-entries
+	var $export = __webpack_require__(6)
+	  , $values = __webpack_require__(413)(false);
+
+	$export($export.S, 'Object', {
+	  values: function values(it){
+	    return $values(it);
+	  }
+	});
+
+/***/ },
+/* 413 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var getKeys   = __webpack_require__(207)
+	  , toIObject = __webpack_require__(209)
+	  , isEnum    = __webpack_require__(232).f;
+	module.exports = function(isEntries){
+	  return function(it){
+	    var O      = toIObject(it)
+	      , keys   = getKeys(O)
+	      , length = keys.length
+	      , i      = 0
+	      , result = []
+	      , key;
+	    while(length > i)if(isEnum.call(O, key = keys[i++])){
+	      result.push(isEntries ? [key, O[key]] : O[key]);
+	    } return result;
+	  };
 	};
 
 /***/ },
@@ -34693,7 +34746,7 @@
 	});
 	exports.HEADER_MOUNT_MENU = exports.HEADER_START_LOADING = exports.SET_HEADER_STATUS = exports.HEADER_SET_CURRENT_SECTION = undefined;
 
-	var _promise = __webpack_require__(398);
+	var _promise = __webpack_require__(394);
 
 	var _promise2 = _interopRequireDefault(_promise);
 
@@ -34858,11 +34911,33 @@
 					isFetching: false,
 					isFetched: true,
 					posts: (0, _assign2.default)({}, state.posts, (0, _defineProperty3.default)({}, action.title, (0, _assign2.default)({}, state.posts[action.title], {
-						posts: action.payload
+						posts: action.payload,
+						components: [],
+						currentPage: 1,
+						postsLoaded: 0,
+						isAllPushed: false
 					})))
 				});
 			case _post.POST_FETCHING_ERROR:
 				return state.errors.concat(action.payload);
+			case _post.MAKE_POST_COMPONENT:
+				return (0, _assign2.default)({}, state, {
+					posts: (0, _assign2.default)({}, state.posts, (0, _defineProperty3.default)({}, action.title, (0, _assign2.default)({}, state.posts[action.title], {
+						components: state.posts[action.title].components.concat(action.payload)
+					})))
+				});
+			case _post.POST_INCREASE_CURRENT_PAGE:
+				return (0, _assign2.default)({}, state, {
+					posts: (0, _assign2.default)({}, state.posts, (0, _defineProperty3.default)({}, action.title, (0, _assign2.default)({}, state.posts[action.title], {
+						currentPage: state.posts[action.title].currentPage + 1
+					})))
+				});
+			case _post.POST_SET_IS_ALL_PUSHED:
+				return (0, _assign2.default)({}, state, {
+					posts: (0, _assign2.default)({}, state.posts, (0, _defineProperty3.default)({}, action.title, (0, _assign2.default)({}, state.posts[action.title], {
+						isAllPushed: action.payload
+					})))
+				});
 			default:
 				return state;
 		}

@@ -1,18 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-// http://stackoverflow.com/questions/1069666/sorting-javascript-object-by-property-value
-// Используя этот материал сделать сортировку с помощью state.sortable и функции posts.sort();
-
 import React, { Component } from 'react';
 import Article from '../Components/Article/ArticleContainer';
 import ArticleListPost from '../Components/ArticleList/ArticleListPosts';
@@ -20,19 +5,12 @@ import ArticleListCollection from '../Components/ArticleList/ArticleListCollecti
 import ArticleListTool from '../Components/ArticleList/ArticleListTools';
 import axios from 'axios';
 import { connect } from 'react-redux';
-import { createPostRequest } from '../../../../actions/post';
+import { createPostRequest, makePostComponent } from '../../../../actions/post';
 
 class PostContainer extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			URL: 'http://jsonplaceholder.typicode.com',
-			postsRaw: [],
-			posts: [],
-			sortable: [],
-			currentPage: 1,
-			postsLoaded: 0,
-			isAllPushed: false,
 			title: null,
 			options: {
 				postsPerPage: this.props.options.postsPerPage || 10,
@@ -50,25 +28,27 @@ class PostContainer extends Component {
 
 	componentWillMount() {
 
-		this.state.title = 'posts' + '-' + 
-				this.state.options.type + '-' + 
-				this.state.params.user + '-' + 
-				this.state.params.tag + '-' +
-				this.state.params.category;
-
-		this.props.dispatch(createPostRequest(this.state.title, this.constructQuery()))
+		const { dispatch, post } = this.props;
+		this.state.title = this.createTitle();
+		dispatch(createPostRequest(this.state.title, this.constructQuery(), this.state.options, this.state.params))
 		
 	}
 	
 	// Создаем компонент
 	componentDidMount() {
-		var posts = this.props.post.posts[this.state.title].posts;
 
-		posts.forEach((post) => {
-			this.state.postsRaw = this.state.postsRaw.concat(post);
-		})
+		const { dispatch, post } = this.props;
+		const posts = post.posts[this.state.title].posts;
 
-		this.pushPosts();
+	}
+
+	createTitle() {
+		return (
+			this.state.options.type + '-' + 
+			this.state.params.user + '-' + 
+			this.state.params.tag + '-' +
+			this.state.params.category
+		)
 	}
 
 	serializeQuery(obj) {
@@ -94,11 +74,14 @@ class PostContainer extends Component {
 
 	// Отображаем посты на экране
 	pushPosts() {
-		let page = this.state.currentPage * this.state.options.postsPerPage;
+		const { dispatch, post } = this.props;
+		const postState = post.posts[this.state.title];
+
+		let page = postState.currentPage * postState.options.postsPerPage;
 		
-		for(var i = this.state.postsLoaded; i <= page; i++) {
-			if (i <= this.state.postsRaw.length) { 
-				this.pushPostToState(this.state.postsRaw[i]);
+		for(var i = postState.postsLoaded; i <= page; i++) {
+			if (i <= postState.posts.length) { 
+				this.pushPostToState(postState.posts[i]);
 			} else {
 				this.setState({
 					isAllPushed: true
@@ -106,14 +89,12 @@ class PostContainer extends Component {
 			}
 		}
 		this.state.currentPage += 1;
-
-
-
-
 	}
 
 	pushPostToState(response) {
-		console.log(response);
+
+		const { dispatch, post } = this.props; 
+
 		if (this.state.options.template == 'list') {
 			var article;
 			switch(this.state.options.type) {
@@ -136,19 +117,16 @@ class PostContainer extends Component {
 			}
 		}
 
-		this.setState({ 
-		    posts: this.state.posts.concat(article),
-			postsLoaded: this.state.postsLoaded + 1,
-		})
+		dispatch(makePostComponent(article, this.state.title));
 
 	}
 
 	render() {
-		console.log(this.state.posts)
+		// console.log(this.props.post.posts[this.state.title])
 		return ( 
 
 			<div>
-				{ this.state.posts }
+				{  }
 				{ (this.state.options.displayGetPostsButton && !this.state.isAllPushed) ? <button className="btn btn-primary" onClick={() => {this.pushPosts()}}>Загрузить ещё</button> : null }
 			</div>
 		);

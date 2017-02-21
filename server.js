@@ -129,7 +129,7 @@
 
 	      Promise.all([store.dispatch(header.ready()), store.dispatch(post.ready())]).then(function () {
 
-	        var appHTML = (0, _server.renderToString)(_react2.default.createElement(
+	        (0, _server.renderToString)(_react2.default.createElement(
 	          _reactRedux.Provider,
 	          { store: store },
 	          _react2.default.createElement(_reactRouter.RouterContext, props)
@@ -139,14 +139,18 @@
 
 	        return {
 	          state: renderedState,
-	          requests: renderedState.post.posts,
-	          html: appHTML
+	          requests: renderedState.post.posts
 	        };
 	      }).then(function (result) {
 	        store.dispatch(post.makeRequests(result.requests)).then(function (state) {
 	          console.log(state);
-	          global.preloadedState = JSON.stringify(state);
-	          res.send(renderPage(result.html, preloadedState));
+	          var html = (0, _server.renderToString)(_react2.default.createElement(
+	            _reactRedux.Provider,
+	            { store: store },
+	            _react2.default.createElement(_reactRouter.RouterContext, props)
+	          ));
+	          var preloadedState = JSON.stringify(state);
+	          res.send(renderPage(html, preloadedState));
 	        });
 	      });
 	    } else {
@@ -307,7 +311,7 @@
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
-	exports.POST_FETCHING_ERROR = exports.POST_FETCHING_COMPLETED = exports.POST_START_FETCH = exports.CREATE_POST_REQUEST = undefined;
+	exports.MAKE_POST_COMPONENT = exports.CREATE_POST_COMPONENTS = exports.POST_SET_IS_ALL_PUSHED = exports.POST_INCREASE_CURRENT_PAGE = exports.POST_FETCHING_ERROR = exports.POST_FETCHING_COMPLETED = exports.POST_START_FETCH = exports.CREATE_POST_REQUEST = undefined;
 	exports.createPostRequest = createPostRequest;
 	exports.makeRequests = makeRequests;
 	exports.ready = ready;
@@ -350,6 +354,51 @@
 		};
 	};
 
+	var POST_INCREASE_CURRENT_PAGE = exports.POST_INCREASE_CURRENT_PAGE = 'POST_INCREASE_CURRENT_PAGE';
+	function increaseCurrentPage(title) {
+		return {
+			type: POST_INCREASE_CURRENT_PAGE,
+			title: title
+		};
+	}
+
+	var POST_SET_IS_ALL_PUSHED = exports.POST_SET_IS_ALL_PUSHED = 'POST_SET_IS_ALL_PUSHED';
+	function setIsAllPushed(value) {
+		return {
+			type: POST_SET_IS_ALL_PUSHED,
+			payload: value
+		};
+	}
+
+	var CREATE_POST_COMPONENTS = exports.CREATE_POST_COMPONENTS = 'CREATE_POST_COMPONENTS';
+	function createPostComponents(posts, title) {
+		return function (dispatch, getState) {
+
+			var postState = getState().post.posts[title];
+			var page = postState.currentPage * postState.options.postsPerPage;
+
+			for (var i = postState.postsLoaded; i <= page; i++) {
+				if (i <= posts.length) {
+					console.log(posts[i]);
+					dispatch(makePostComponent(posts[i], title));
+				} else {
+					dispatch(setIsAllPushed(true));
+				}
+			}
+
+			dispatch(increaseCurrentPage(title));
+		};
+	}
+
+	var MAKE_POST_COMPONENT = exports.MAKE_POST_COMPONENT = 'MAKE_POST_COMPONENT';
+	function makePostComponent(post, title) {
+		return {
+			type: MAKE_POST_COMPONENT,
+			payload: post,
+			title: title
+		};
+	}
+
 	function shouldCreateRequest(title, state) {
 		if (state.post.posts.hasOwnProperty(title)) {
 			return true;
@@ -358,12 +407,14 @@
 		}
 	}
 
-	function createPostRequest(title, query) {
+	function createPostRequest(title, query, options, params) {
 		return function (dispatch, getState) {
 			if (!shouldCreateRequest(title, getState())) {
 				dispatch({ type: CREATE_POST_REQUEST, payload: {
 						title: title,
 						query: query,
+						options: options,
+						params: params,
 						posts: null
 					} });
 			} else {
@@ -380,6 +431,9 @@
 				title: request.title,
 				query: request.query
 			});
+			return result;
+		}).then(function (result) {
+			dispatch(createPostComponents(result.data, request.title));
 		});
 	}
 
@@ -398,6 +452,10 @@
 			});
 		};
 	}
+
+	/* this.setState({ 
+			    posts: this.state.posts.concat(article),
+				postsLoaded: this.state.postsLoaded + 1,
 
 	/*
 
@@ -506,11 +564,33 @@
 					isFetching: false,
 					isFetched: true,
 					posts: _extends({}, state.posts, _defineProperty({}, action.title, _extends({}, state.posts[action.title], {
-						posts: action.payload
+						posts: action.payload,
+						components: [],
+						currentPage: 1,
+						postsLoaded: 0,
+						isAllPushed: false
 					})))
 				});
 			case _post.POST_FETCHING_ERROR:
 				return state.errors.concat(action.payload);
+			case _post.MAKE_POST_COMPONENT:
+				return _extends({}, state, {
+					posts: _extends({}, state.posts, _defineProperty({}, action.title, _extends({}, state.posts[action.title], {
+						components: state.posts[action.title].components.concat(action.payload)
+					})))
+				});
+			case _post.POST_INCREASE_CURRENT_PAGE:
+				return _extends({}, state, {
+					posts: _extends({}, state.posts, _defineProperty({}, action.title, _extends({}, state.posts[action.title], {
+						currentPage: state.posts[action.title].currentPage + 1
+					})))
+				});
+			case _post.POST_SET_IS_ALL_PUSHED:
+				return _extends({}, state, {
+					posts: _extends({}, state.posts, _defineProperty({}, action.title, _extends({}, state.posts[action.title], {
+						isAllPushed: action.payload
+					})))
+				});
 			default:
 				return state;
 		}
@@ -1020,9 +1100,6 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	// http://stackoverflow.com/questions/1069666/sorting-javascript-object-by-property-value
-	// Используя этот материал сделать сортировку с помощью state.sortable и функции posts.sort();
-
 	var PostContainer = function (_Component) {
 		_inherits(PostContainer, _Component);
 
@@ -1032,13 +1109,6 @@
 			var _this = _possibleConstructorReturn(this, (PostContainer.__proto__ || Object.getPrototypeOf(PostContainer)).call(this, props));
 
 			_this.state = {
-				URL: 'http://jsonplaceholder.typicode.com',
-				postsRaw: [],
-				posts: [],
-				sortable: [],
-				currentPage: 1,
-				postsLoaded: 0,
-				isAllPushed: false,
 				title: null,
 				options: {
 					postsPerPage: _this.props.options.postsPerPage || 10,
@@ -1058,10 +1128,12 @@
 		_createClass(PostContainer, [{
 			key: 'componentWillMount',
 			value: function componentWillMount() {
+				var _props = this.props,
+				    dispatch = _props.dispatch,
+				    post = _props.post;
 
-				this.state.title = 'posts' + '-' + this.state.options.type + '-' + this.state.params.user + '-' + this.state.params.tag + '-' + this.state.params.category;
-
-				this.props.dispatch((0, _post.createPostRequest)(this.state.title, this.constructQuery()));
+				this.state.title = this.createTitle();
+				dispatch((0, _post.createPostRequest)(this.state.title, this.constructQuery(), this.state.options, this.state.params));
 			}
 
 			// Создаем компонент
@@ -1069,15 +1141,16 @@
 		}, {
 			key: 'componentDidMount',
 			value: function componentDidMount() {
-				var _this2 = this;
+				var _props2 = this.props,
+				    dispatch = _props2.dispatch,
+				    post = _props2.post;
 
-				var posts = this.props.post.posts[this.state.title].posts;
-
-				posts.forEach(function (post) {
-					_this2.state.postsRaw = _this2.state.postsRaw.concat(post);
-				});
-
-				this.pushPosts();
+				var posts = post.posts[this.state.title].posts;
+			}
+		}, {
+			key: 'createTitle',
+			value: function createTitle() {
+				return this.state.options.type + '-' + this.state.params.user + '-' + this.state.params.tag + '-' + this.state.params.category;
 			}
 		}, {
 			key: 'serializeQuery',
@@ -1109,11 +1182,17 @@
 		}, {
 			key: 'pushPosts',
 			value: function pushPosts() {
-				var page = this.state.currentPage * this.state.options.postsPerPage;
+				var _props3 = this.props,
+				    dispatch = _props3.dispatch,
+				    post = _props3.post;
 
-				for (var i = this.state.postsLoaded; i <= page; i++) {
-					if (i <= this.state.postsRaw.length) {
-						this.pushPostToState(this.state.postsRaw[i]);
+				var postState = post.posts[this.state.title];
+
+				var page = postState.currentPage * postState.options.postsPerPage;
+
+				for (var i = postState.postsLoaded; i <= page; i++) {
+					if (i <= postState.posts.length) {
+						this.pushPostToState(postState.posts[i]);
 					} else {
 						this.setState({
 							isAllPushed: true
@@ -1125,7 +1204,11 @@
 		}, {
 			key: 'pushPostToState',
 			value: function pushPostToState(response) {
-				console.log(response);
+				var _props4 = this.props,
+				    dispatch = _props4.dispatch,
+				    post = _props4.post;
+
+
 				if (this.state.options.template == 'list') {
 					var article;
 					switch (this.state.options.type) {
@@ -1148,25 +1231,21 @@
 					}
 				}
 
-				this.setState({
-					posts: this.state.posts.concat(article),
-					postsLoaded: this.state.postsLoaded + 1
-				});
+				dispatch((0, _post.makePostComponent)(article, this.state.title));
 			}
 		}, {
 			key: 'render',
 			value: function render() {
-				var _this3 = this;
+				var _this2 = this;
 
-				console.log(this.state.posts);
+				// console.log(this.props.post.posts[this.state.title])
 				return _react2.default.createElement(
 					'div',
 					null,
-					this.state.posts,
 					this.state.options.displayGetPostsButton && !this.state.isAllPushed ? _react2.default.createElement(
 						'button',
 						{ className: 'btn btn-primary', onClick: function onClick() {
-								_this3.pushPosts();
+								_this2.pushPosts();
 							} },
 						'\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0435\u0449\u0451'
 					) : null

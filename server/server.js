@@ -48,26 +48,30 @@ app.get('*', (req, res) => {
     ])
     .then(() => {
       
-      let appHTML = renderToString(
+      renderToString(
         <Provider store={store}>
           <RouterContext  {...props} />
         </Provider> 
       )
 
-      let renderedState = store.getState();
+      const renderedState = store.getState();
 
       return {
         state : renderedState,
-        requests : renderedState.post.posts,
-        html: appHTML
+        requests : renderedState.post.posts
       };
     })
     .then((result) => {
       store.dispatch(post.makeRequests(result.requests))
       .then((state) => {
         console.log(state);
-        global.preloadedState = JSON.stringify(state);
-        res.send(renderPage(result.html, preloadedState));
+        const html = renderToString(
+          <Provider store={store}>
+            <RouterContext  {...props} />
+          </Provider> 
+        )
+        const preloadedState = JSON.stringify(state);
+        res.send(renderPage(html, preloadedState));
       })
     })
 

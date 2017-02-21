@@ -32,6 +32,54 @@ var startFetching = (value) => {
 	}
 }
 
+export const POST_INCREASE_CURRENT_PAGE = 'POST_INCREASE_CURRENT_PAGE';
+function increaseCurrentPage(title) {
+	return {
+		type: POST_INCREASE_CURRENT_PAGE,
+		title
+	}
+}
+
+export const POST_SET_IS_ALL_PUSHED = 'POST_SET_IS_ALL_PUSHED';
+function setIsAllPushed(value) {
+	return {
+		type: POST_SET_IS_ALL_PUSHED,
+		payload: value
+	}
+}
+
+
+export const CREATE_POST_COMPONENTS = 'CREATE_POST_COMPONENTS';
+function createPostComponents(posts, title) {
+	return (dispatch, getState) => {
+
+
+		let postState = getState().post.posts[title];
+		let page = postState.currentPage * postState.options.postsPerPage;
+		
+		for(var i = postState.postsLoaded; i <= page; i++) {
+			if (i <= posts.length) { 
+				console.log(posts[i])
+				dispatch(makePostComponent(posts[i], title))
+			} else {
+				dispatch(setIsAllPushed(true));
+			}
+		}
+
+		dispatch(increaseCurrentPage(title));
+
+	}
+}
+
+export const MAKE_POST_COMPONENT = 'MAKE_POST_COMPONENT';
+function makePostComponent(post, title) {
+	return {
+		type: MAKE_POST_COMPONENT,
+		payload: post,
+		title
+	}
+}
+
 function shouldCreateRequest(title, state) {
 	if (state.post.posts.hasOwnProperty(title)) {
 		return true
@@ -40,12 +88,14 @@ function shouldCreateRequest(title, state) {
 	}
 }
  
-export function createPostRequest(title, query) {
+export function createPostRequest(title, query, options, params) {
 	return (dispatch, getState) => {
 		if (!shouldCreateRequest(title, getState())) {
 			dispatch({type: CREATE_POST_REQUEST, payload: {
 				title,
 				query,
+				options,
+				params,
 				posts: null
 			}})
 		} else {
@@ -64,6 +114,10 @@ function makeRequest(request, dispatch) {
 				title: request.title, 
 				query: request.query 
 			})
+			return result
+		})
+		.then((result) => {
+			dispatch(createPostComponents(result.data, request.title))
 		})
 }
 
@@ -83,6 +137,9 @@ export function makeRequests(requests) {
 	}
 }
 
+/* this.setState({ 
+		    posts: this.state.posts.concat(article),
+			postsLoaded: this.state.postsLoaded + 1,
 
 /*
 
