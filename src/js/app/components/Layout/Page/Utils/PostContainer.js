@@ -11,6 +11,7 @@ class PostContainer extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			URL: 'https://jsonplaceholder.typicode.com',
 			title: null,
 			options: {
 				postsPerPage: this.props.options.postsPerPage || 10,
@@ -39,11 +40,12 @@ class PostContainer extends Component {
 
 		const { dispatch, post } = this.props;
 		const posts = post.posts[this.state.title].posts;
+		// this.pushPosts();
 
 	}
 
 	createTitle() {
-		return (
+		return  (
 			this.state.options.type + '-' + 
 			this.state.params.user + '-' + 
 			this.state.params.tag + '-' +
@@ -73,7 +75,7 @@ class PostContainer extends Component {
 
 
 	// Отображаем посты на экране
-	pushPosts() {
+	/* pushPosts() {
 		const { dispatch, post } = this.props;
 		const postState = post.posts[this.state.title];
 
@@ -89,44 +91,61 @@ class PostContainer extends Component {
 			}
 		}
 		this.state.currentPage += 1;
-	}
+	} */
 
-	pushPostToState(response) {
+	static pushPostToState(postRaw, title, state) {
 
-		const { dispatch, post } = this.props; 
+		const post = state.post;
+		const postState = post.posts[title];
+		let article;
 
-		if (this.state.options.template == 'list') {
-			var article;
-			switch(this.state.options.type) {
+		if (postState.options.template == 'list') {
+			switch(postState.options.type) {
 				case 'posts' : 
-					var article = React.createElement(ArticleListPost, {data: response, key: response.id});
+					article = React.createElement(ArticleListPost, {data: postRaw, key: postRaw.id});
 					break;
 				case 'tools' : 
-					var article = React.createElement(ArticleListTool, {data: response, key: response.id});
+					article = React.createElement(ArticleListTool, {data: postRaw, key: postRaw.id});
 
 					break;
 				case 'collections' :
-					var article = React.createElement(ArticleListCollection, {data: response, key: response.id});
+					article = React.createElement(ArticleListCollection, {data: postRaw, key: postRaw.id});
 					break;
 			}
 		} else {
-			switch(this.state.options.type) {
+			switch(postState.options.type) {
 				case 'posts' : 
-					var article = React.createElement(Article, {data: response, key: response.id});
+					article = React.createElement(Article, {data: postRaw, key: postRaw.id});
 					break;
 			}
 		}
 
-		dispatch(makePostComponent(article, this.state.title));
+		return article;
 
 	}
 
+	shouldDisplayPosts() {
+		if (Object.keys(this.props.post.posts).length == 0) {
+			return false
+		} else {
+			return Object.values(this.props.post.posts).every((item, i, arr) =>  {
+				return item.hasOwnProperty('components')
+			})
+		}
+	}
+
+	displayPosts() {
+		if (this.shouldDisplayPosts()) {
+			return this.props.post.posts[this.state.title].components;
+		}
+	}
+
 	render() {
-		// console.log(this.props.post.posts[this.state.title])
+		console.log(this.displayPosts())
 		return ( 
 
 			<div>
-				{  }
+				{ this.displayPosts() }
 				{ (this.state.options.displayGetPostsButton && !this.state.isAllPushed) ? <button className="btn btn-primary" onClick={() => {this.pushPosts()}}>Загрузить ещё</button> : null }
 			</div>
 		);

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import PostContainer from '../components/Layout/Page/Utils/PostContainer';
 
 export const CREATE_POST_REQUEST = 'CREATE_POST_REQUEST';
 var createPostRequests = (value) => {
@@ -59,8 +60,7 @@ function createPostComponents(posts, title) {
 		
 		for(var i = postState.postsLoaded; i <= page; i++) {
 			if (i <= posts.length) { 
-				console.log(posts[i])
-				dispatch(makePostComponent(posts[i], title))
+				dispatch(makePostComponent(posts[i], title, getState()))
 			} else {
 				dispatch(setIsAllPushed(true));
 			}
@@ -72,10 +72,11 @@ function createPostComponents(posts, title) {
 }
 
 export const MAKE_POST_COMPONENT = 'MAKE_POST_COMPONENT';
-function makePostComponent(post, title) {
+function makePostComponent(post, title, state) {
+	var component = PostContainer.pushPostToState(post, title, state);
 	return {
 		type: MAKE_POST_COMPONENT,
-		payload: post,
+		payload: component,
 		title
 	}
 }
@@ -137,26 +138,6 @@ export function makeRequests(requests) {
 	}
 }
 
-/* this.setState({ 
-		    posts: this.state.posts.concat(article),
-			postsLoaded: this.state.postsLoaded + 1,
-
-/*
-
-function makeRequests(requests) {
-	return (dispatch) => {
-		return axios.get(request.query)
-		.then(
-		(result) => {
-			dispatch({ type: POST_FETCHING_COMPLETED, payload: result.data, title, query })
-		},
-		(err) => {
-			console.log(err);
-		})
-	}
-}
-
-*/
 
 export function ready() {
 	return (dispatch, getState) => {

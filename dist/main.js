@@ -29585,6 +29585,14 @@
 		value: true
 	});
 
+	var _values = __webpack_require__(410);
+
+	var _values2 = _interopRequireDefault(_values);
+
+	var _keys = __webpack_require__(438);
+
+	var _keys2 = _interopRequireDefault(_keys);
+
 	var _getPrototypeOf = __webpack_require__(182);
 
 	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
@@ -29644,6 +29652,7 @@
 			var _this = (0, _possibleConstructorReturn3.default)(this, (PostContainer.__proto__ || (0, _getPrototypeOf2.default)(PostContainer)).call(this, props));
 
 			_this.state = {
+				URL: 'https://jsonplaceholder.typicode.com',
 				title: null,
 				options: {
 					postsPerPage: _this.props.options.postsPerPage || 10,
@@ -29681,6 +29690,7 @@
 				    post = _props2.post;
 
 				var posts = post.posts[this.state.title].posts;
+				// this.pushPosts();
 			}
 		}, {
 			key: 'createTitle',
@@ -29713,70 +29723,52 @@
 			}
 
 			// Отображаем посты на экране
+			/* pushPosts() {
+	  	const { dispatch, post } = this.props;
+	  	const postState = post.posts[this.state.title];
+	  
+	  	let page = postState.currentPage * postState.options.postsPerPage;
+	  	
+	  	for(var i = postState.postsLoaded; i <= page; i++) {
+	  		if (i <= postState.posts.length) { 
+	  			this.pushPostToState(postState.posts[i]);
+	  		} else {
+	  			this.setState({
+	  				isAllPushed: true
+	  			})
+	  		}
+	  	}
+	  	this.state.currentPage += 1;
+	  } */
 
 		}, {
-			key: 'pushPosts',
-			value: function pushPosts() {
-				var _props3 = this.props,
-				    dispatch = _props3.dispatch,
-				    post = _props3.post;
-
-				var postState = post.posts[this.state.title];
-
-				var page = postState.currentPage * postState.options.postsPerPage;
-
-				for (var i = postState.postsLoaded; i <= page; i++) {
-					if (i <= postState.posts.length) {
-						this.pushPostToState(postState.posts[i]);
-					} else {
-						this.setState({
-							isAllPushed: true
-						});
-					}
+			key: 'shouldDisplayPosts',
+			value: function shouldDisplayPosts() {
+				if ((0, _keys2.default)(this.props.post.posts).length == 0) {
+					return false;
+				} else {
+					return (0, _values2.default)(this.props.post.posts).every(function (item, i, arr) {
+						return item.hasOwnProperty('components');
+					});
 				}
-				this.state.currentPage += 1;
 			}
 		}, {
-			key: 'pushPostToState',
-			value: function pushPostToState(response) {
-				var _props4 = this.props,
-				    dispatch = _props4.dispatch,
-				    post = _props4.post;
-
-
-				if (this.state.options.template == 'list') {
-					var article;
-					switch (this.state.options.type) {
-						case 'posts':
-							var article = _react2.default.createElement(_ArticleListPosts2.default, { data: response, key: response.id });
-							break;
-						case 'tools':
-							var article = _react2.default.createElement(_ArticleListTools2.default, { data: response, key: response.id });
-
-							break;
-						case 'collections':
-							var article = _react2.default.createElement(_ArticleListCollections2.default, { data: response, key: response.id });
-							break;
-					}
-				} else {
-					switch (this.state.options.type) {
-						case 'posts':
-							var article = _react2.default.createElement(_ArticleContainer2.default, { data: response, key: response.id });
-							break;
-					}
+			key: 'displayPosts',
+			value: function displayPosts() {
+				if (this.shouldDisplayPosts()) {
+					return this.props.post.posts[this.state.title].components;
 				}
-
-				dispatch((0, _post.makePostComponent)(article, this.state.title));
 			}
 		}, {
 			key: 'render',
 			value: function render() {
 				var _this2 = this;
 
-				// console.log(this.props.post.posts[this.state.title])
+				console.log(this.displayPosts());
 				return _react2.default.createElement(
 					'div',
 					null,
+					this.displayPosts(),
 					this.state.options.displayGetPostsButton && !this.state.isAllPushed ? _react2.default.createElement(
 						'button',
 						{ className: 'btn btn-primary', onClick: function onClick() {
@@ -29785,6 +29777,37 @@
 						'\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0435\u0449\u0451'
 					) : null
 				);
+			}
+		}], [{
+			key: 'pushPostToState',
+			value: function pushPostToState(postRaw, title, state) {
+
+				var post = state.post;
+				var postState = post.posts[title];
+				var article = void 0;
+
+				if (postState.options.template == 'list') {
+					switch (postState.options.type) {
+						case 'posts':
+							article = _react2.default.createElement(_ArticleListPosts2.default, { data: postRaw, key: postRaw.id });
+							break;
+						case 'tools':
+							article = _react2.default.createElement(_ArticleListTools2.default, { data: postRaw, key: postRaw.id });
+
+							break;
+						case 'collections':
+							article = _react2.default.createElement(_ArticleListCollections2.default, { data: postRaw, key: postRaw.id });
+							break;
+					}
+				} else {
+					switch (postState.options.type) {
+						case 'posts':
+							article = _react2.default.createElement(_ArticleContainer2.default, { data: postRaw, key: postRaw.id });
+							break;
+					}
+				}
+
+				return article;
 			}
 		}]);
 		return PostContainer;
@@ -32289,6 +32312,10 @@
 
 	var _axios2 = _interopRequireDefault(_axios);
 
+	var _PostContainer = __webpack_require__(355);
+
+	var _PostContainer2 = _interopRequireDefault(_PostContainer);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var CREATE_POST_REQUEST = exports.CREATE_POST_REQUEST = 'CREATE_POST_REQUEST';
@@ -32348,8 +32375,7 @@
 
 			for (var i = postState.postsLoaded; i <= page; i++) {
 				if (i <= posts.length) {
-					console.log(posts[i]);
-					dispatch(makePostComponent(posts[i], title));
+					dispatch(makePostComponent(posts[i], title, getState()));
 				} else {
 					dispatch(setIsAllPushed(true));
 				}
@@ -32360,10 +32386,11 @@
 	}
 
 	var MAKE_POST_COMPONENT = exports.MAKE_POST_COMPONENT = 'MAKE_POST_COMPONENT';
-	function makePostComponent(post, title) {
+	function makePostComponent(post, title, state) {
+		var component = _PostContainer2.default.pushPostToState(post, title, state);
 		return {
 			type: MAKE_POST_COMPONENT,
-			payload: post,
+			payload: component,
 			title: title
 		};
 	}
@@ -32421,27 +32448,6 @@
 			});
 		};
 	}
-
-	/* this.setState({ 
-			    posts: this.state.posts.concat(article),
-				postsLoaded: this.state.postsLoaded + 1,
-
-	/*
-
-	function makeRequests(requests) {
-		return (dispatch) => {
-			return axios.get(request.query)
-			.then(
-			(result) => {
-				dispatch({ type: POST_FETCHING_COMPLETED, payload: result.data, title, query })
-			},
-			(err) => {
-				console.log(err);
-			})
-		}
-	}
-
-	*/
 
 	function ready() {
 		return function (dispatch, getState) {
@@ -35125,6 +35131,33 @@
 	  this
 
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 438 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = { "default": __webpack_require__(439), __esModule: true };
+
+/***/ },
+/* 439 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(440);
+	module.exports = __webpack_require__(8).Object.keys;
+
+/***/ },
+/* 440 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// 19.1.2.14 Object.keys(O)
+	var toObject = __webpack_require__(185)
+	  , $keys    = __webpack_require__(207);
+
+	__webpack_require__(192)('keys', function(){
+	  return function keys(it){
+	    return $keys(toObject(it));
+	  };
+	});
 
 /***/ }
 /******/ ]);

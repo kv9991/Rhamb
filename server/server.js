@@ -47,13 +47,14 @@ app.get('*', (req, res) => {
       store.dispatch(post.ready())
     ])
     .then(() => {
-      
+
+
       renderToString(
         <Provider store={store}>
           <RouterContext  {...props} />
         </Provider> 
       )
-
+      
       const renderedState = store.getState();
 
       return {
@@ -64,7 +65,6 @@ app.get('*', (req, res) => {
     .then((result) => {
       store.dispatch(post.makeRequests(result.requests))
       .then((state) => {
-        console.log(state);
         const html = renderToString(
           <Provider store={store}>
             <RouterContext  {...props} />
